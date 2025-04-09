@@ -35,6 +35,7 @@ namespace GameBarMediaWidget
                 await _settingWidget.CenterWindowAsync();
             }
             playbackControlToggle.IsOn = MainPage.IsPlaybackControlVisible;
+            albumArtToggle.IsOn = MainPage.IsAlbumArtVisible;
         }
 
         private void PlaybackControlToggle_Toggled(object sender, RoutedEventArgs e)
@@ -43,6 +44,15 @@ namespace GameBarMediaWidget
             if (toggleSwitch != null)
             {
                 MainPage.OnPlaybackControlVisibilityToggled.Invoke(toggleSwitch.IsOn);
+            }
+        }
+
+        private void AlbumArtToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                MainPage.OnAlbumArtVisibilityToggled.Invoke(toggleSwitch.IsOn);
             }
         }
 

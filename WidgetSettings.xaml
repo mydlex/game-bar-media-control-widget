@@ -13,11 +13,14 @@
         CornerRadius="12"
         Padding="16"
         HorizontalAlignment="Left"
-        VerticalAlignment="Center">
-        <StackPanel Orientation="Horizontal">
+        VerticalAlignment="Top">
+        <StackPanel Orientation="Vertical" Spacing="20">
             <ToggleSwitch x:Name="playbackControlToggle"
                 Header="Show playback controls" 
                 Toggled="PlaybackControlToggle_Toggled"/>
+            <ToggleSwitch x:Name="albumArtToggle"
+                Header="Show album art" 
+                Toggled="AlbumArtToggle_Toggled"/>
         </StackPanel>
     </Border>
 </Page>

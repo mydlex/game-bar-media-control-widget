@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Media.Control;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -22,7 +23,9 @@ namespace GameBarMediaWidget
         private GlobalSystemMediaTransportControlsSession _currentSession = null;
         private GlobalSystemMediaTransportControlsSessionManager _manager = null;
         public static bool IsPlaybackControlVisible = true;
+        public static bool IsAlbumArtVisible = true;
         public static Action<bool> OnPlaybackControlVisibilityToggled;
+        public static Action<bool> OnAlbumArtVisibilityToggled;
 
         public MainPage()
         {
@@ -37,15 +40,17 @@ namespace GameBarMediaWidget
             {
                 double stackHeight = InfoStack.ActualHeight;
                 AlbumArtImage.Height = stackHeight;
-                AlbumArtImage.Width = stackHeight; // make it square
+                AlbumArtImage.Width = stackHeight;
 
                 _widget.MinWindowSize = new Size(260, stackHeight + (16 * 2));
+
+                await Task.Yield();
                 Size newSize = new Size(this.ActualWidth, stackHeight + (16 * 2));
-                
                 await _widget.TryResizeWindowAsync(newSize);
             };
 
             OnPlaybackControlVisibilityToggled += TogglePlaybackControlVisibility;
+            OnAlbumArtVisibilityToggled += ToggleAlbumArtVisibility;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -60,6 +65,16 @@ namespace GameBarMediaWidget
                 BackgroundLayer.Opacity = _widget.RequestedOpacity;
 
                 _widget.SettingsClicked += Widget_SettingsClicked;
+
+                if (ApplicationData.Current.LocalSettings.Values.TryGetValue("PlaybackControlVisibility", out object controlVisibilityPref) && controlVisibilityPref is bool controlVisibility)
+                {
+                    SetPlaybackControlVisibility(controlVisibility);
+                }
+
+                if (ApplicationData.Current.LocalSettings.Values.TryGetValue("AlbumArtVisibility", out object albumArtVisibilityPref) && albumArtVisibilityPref is bool albumArtVisibility)
+                {
+                    SetAlbumArtVisibility(albumArtVisibility);
+                }
             }
         }
 
@@ -80,6 +95,7 @@ namespace GameBarMediaWidget
                 _manager.CurrentSessionChanged -= OnSessionChangedAsync;
 
             OnPlaybackControlVisibilityToggled -= TogglePlaybackControlVisibility;
+            OnAlbumArtVisibilityToggled -= ToggleAlbumArtVisibility;
         }
 
         private async void Widget_RequestedOpacityChanged(XboxGameBarWidget sender, object args)
@@ -142,9 +158,9 @@ namespace GameBarMediaWidget
             }
             else
             {
-                // Reset UI
                 await RootGrid.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                 {
+                    // Reset UI
                     ViewModel.AlbumArt = null;
                     ViewModel.TrackTitle = "";
                     ViewModel.ArtistName = "";
@@ -199,9 +215,9 @@ namespace GameBarMediaWidget
 
                 await RootGrid.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                 {
-                    var bitmapImage = new BitmapImage();
                     if (thumbnailRef != null)
                     {
+                        var bitmapImage = new BitmapImage();
                         using (var stream = await thumbnailRef.OpenReadAsync())
                         {
                             await bitmapImage.SetSourceAsync(stream);
@@ -241,9 +257,30 @@ namespace GameBarMediaWidget
         {
             await RootGrid.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                PlaybackControlStack.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-                IsPlaybackControlVisible = isVisible;
+                SetPlaybackControlVisibility(isVisible);
             });
+            ApplicationData.Current.LocalSettings.Values["PlaybackControlVisibility"] = isVisible;
+        }
+
+        private void SetPlaybackControlVisibility(bool isVisible)
+        {
+            PlaybackControlStack.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            IsPlaybackControlVisible = isVisible;
+        }
+
+        public async void ToggleAlbumArtVisibility(bool isVisible)
+        {
+            await RootGrid.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                SetAlbumArtVisibility(isVisible);
+            });
+            ApplicationData.Current.LocalSettings.Values["AlbumArtVisibility"] = isVisible;
+        }
+
+        private void SetAlbumArtVisibility(bool isVisible)
+        {
+            AlbumArtImage.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            IsAlbumArtVisible = isVisible;
         }
     }
 }

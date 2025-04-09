@@ -60,15 +60,15 @@
                 <Window>
                   <Size>
                     <Height>150</Height>
-                    <Width>300</Width>
+                    <Width>350</Width>
                     <MinHeight>130</MinHeight>
                     <MinWidth>260</MinWidth>
                     <MaxHeight>200</MaxHeight>
-                    <MaxWidth>400</MaxWidth>
+                    <MaxWidth>600</MaxWidth>
                   </Size>
                   <ResizeSupported>
                     <Horizontal>true</Horizontal>
-                    <Vertical>true</Vertical>
+                    <Vertical>false</Vertical>
                   </ResizeSupported>
                 </Window>
               </GameBarWidget>
@@ -86,11 +86,11 @@
                 <Window>
                   <Size>
                     <Height>150</Height>
-                    <Width>300</Width>
+                    <Width>190</Width>
                     <MinHeight>150</MinHeight>
-                    <MinWidth>300</MinWidth>
+                    <MinWidth>190</MinWidth>
                     <MaxHeight>200</MaxHeight>
-                    <MaxWidth>400</MaxWidth>
+                    <MaxWidth>250</MaxWidth>
                   </Size>
                   <ResizeSupported>
                     <Horizontal>true</Horizontal>

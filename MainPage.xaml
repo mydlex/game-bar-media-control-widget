@@ -16,11 +16,10 @@
         <Grid
             x:Name="RootGrid"
             HorizontalAlignment="Left"
-            VerticalAlignment="Center" RenderTransformOrigin="0.452,0.519">
+            VerticalAlignment="Center">
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="16"/> <!-- Spacer -->
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -31,7 +30,8 @@
                 Width="Auto"
                 Height="Auto"
                 Stretch="UniformToFill"
-                VerticalAlignment="Stretch"/>
+                VerticalAlignment="Stretch"
+                Margin="0 0 16 0"/>
 
             <!-- Media Info and Controls -->
             <StackPanel
