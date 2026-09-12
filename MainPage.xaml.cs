@@ -22,6 +22,8 @@ namespace GameBarMediaWidget
         private XboxGameBarWidget _widget = null;
         private GlobalSystemMediaTransportControlsSession _currentSession = null;
         private GlobalSystemMediaTransportControlsSessionManager _manager = null;
+        private bool _isResizingWidget = false;
+        private Size _lastAppliedWidgetSize = Size.Empty;
         public static bool IsPlaybackControlVisible = true;
         public static bool IsAlbumArtVisible = true;
         public static Action<bool> OnPlaybackControlVisibilityToggled;
@@ -38,15 +40,32 @@ namespace GameBarMediaWidget
             // Make album art square
             InfoStack.SizeChanged += async (s, args) =>
             {
+                if (_widget == null)
+                    return;
+
                 double stackHeight = InfoStack.ActualHeight;
+                if (stackHeight <= 0)
+                    return;
+
                 AlbumArtImage.Height = stackHeight;
                 AlbumArtImage.Width = stackHeight;
 
                 _widget.MinWindowSize = new Size(260, stackHeight + (16 * 2));
 
-                await Task.Yield();
                 Size newSize = new Size(this.ActualWidth, stackHeight + (16 * 2));
-                await _widget.TryResizeWindowAsync(newSize);
+                // Guard against reentrant/overlapping resize requests: SizeChange can fire again as a side effect of the resize below,
+                // and stacking up concurrent TryResizeWindowAsync calls floods the Game Bar host's compositor, which can destabalize the graphics driver, causing BSOD.
+                if (_isResizingWidget || newSize == _lastAppliedWidgetSize)
+                    return;
+
+                _isResizingWidget = true;
+                try {
+                    await Task.Yield();
+                    await _widget.TryResizeWindowAsync(newSize);
+                    _lastAppliedWidgetSize = newSize;
+                } finally {
+                    _isResizingWidget = false;
+                }
             };
 
             OnPlaybackControlVisibilityToggled += TogglePlaybackControlVisibility;
